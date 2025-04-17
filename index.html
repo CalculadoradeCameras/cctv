@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Câmeras</title>
+    <style>
+body {
+            background-image: url(https://i.pinimg.com/1200x/f6/b7/bd/f6b7bdf444fc1c00f8f49a596ea765d4.jpg);
+            color: white;
+            background-size: 108%;
+            font-family: Arial, sans-serif;
+            text-align: center;
+        }
+        .container {
+            width: 50%;
+            margin: auto;
+            padding: 20px;
+        }
+        table {
+            background-color: black;
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 170px;
+        }
+        th, td {
+            border: 1px solid white;
+            padding: 10px;
+        }
+        input, select {
+            width: 100%;
+            padding: 5px;
+        }
+        button {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: white;
+            border: none;
+            cursor: pointer;
+        }
+        .login-container {
+            width: 300px;
+            margin: 15% auto;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+        }
+    </style>
+</head>
+<body>
+    <!-- Tela de Login -->
+    <div id="loginScreen" class="login-container">
+        <h1>Login</h1>
+        <input type="email" id="email" placeholder="Email"><br><br>
+        <input type="password" id="password" placeholder="password"><br><br>
+        <button onclick="verificarLogin()">Iniciar sesión</button>
+        <p id="loginMessage"></p>
+    </div>
+    
+    <!-- Tela da Calculadora -->
+    <div id="calculadoraScreen" class="container" style="display: none;">
+        <h1></h1>
+        <table>
+            <tr>
+                <th>Descripción</th>
+                <th>Cantidad</th>
+            </tr>
+            <tr>
+                <td>Área (m²)</td>
+                <td><input type="number" id="area" value="100"></td>
+            </tr>
+            <tr>
+                <td>Tipo de cámara</td>
+                <td>
+                    <select id="tipoCamera">
+                        <option value="Bullet">Bullet</option>
+                        <option value="Dome">Dome</option>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td>Ángulo (°)</td>
+                <td><input type="number" id="angulo" value="6"></td>
+            </tr>
+            <tr>
+                <td>Alcance del IR (Infrarrojo)</td>
+                <td><input type="number" id="alcance" value="10"></td>
+            </tr>
+            <tr>
+                <td>Número de compartimentos o obstrucciones</td>
+                <td><input type="number" id="obstrucoes" value="0"></td>
+            </tr>
+        </table>
+        <button onclick="calcularCameras()">Calcular</button>
+        <p id="resultado"></p>
+    </div>
+
+    <!-- Firebase + Lógica de Login + Cálculo -->
+    <script type="module">
+        // Importando Firebase
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+        // 🔥 Configuração do Firebase (SEU CÓDIGO)
+        const firebaseConfig = {
+            apiKey: "AIzaSyAtcu7ql5-vp2x9CWRxtVqDYYFs1xzKMxA",
+            authDomain: "cameras-bae4b.firebaseapp.com",
+            projectId: "cameras-bae4b",
+            storageBucket: "cameras-bae4b.firebasestorage.app",
+            messagingSenderId: "145502164161",
+            appId: "1:145502164161:web:1b8cb1defbb401369db040"
+        };
+
+        // Inicializa o Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth();
+
+        // Função para login
+        window.verificarLogin = function() {
+            let email = document.getElementById('email').value;
+            let password = document.getElementById('password').value;
+
+            signInWithEmailAndPassword(auth, email, password)
+                .then(() => {
+                    document.getElementById('loginScreen').style.display = 'none';
+                    document.getElementById('calculadoraScreen').style.display = 'block';
+                })
+                .catch(() => {
+                    document.getElementById('loginMessage').innerText = "Email ou senha incorretos.";
+                });
+        };
+
+        // Função para calcular câmeras
+        window.calcularCameras = function() {
+            let area = parseFloat(document.getElementById('area').value);
+            let angulo = parseFloat(document.getElementById('angulo').value);
+            let alcance = parseFloat(document.getElementById('alcance').value);
+            let obstrucoes = parseInt(document.getElementById('obstrucoes').value);
+            
+            if (area > 0 && angulo > 0 && alcance > 0) {
+                let coberturaPorCamera = 2 * alcance * Math.tan((angulo / 2) * (Math.PI / 180));
+                let quantidadeBase = Math.ceil(area / coberturaPorCamera);
+                let quantidadeFinal = quantidadeBase + obstrucoes;
+                
+                document.getElementById('resultado').innerText = `Cantidad necesaria: ${quantidadeFinal} cámaras`;
+            } else {
+                document.getElementById('resultado').innerText = 'Por favor, ingrese valores válidos.';
+            }
+        };
+    </script>
+</body>
+</html
